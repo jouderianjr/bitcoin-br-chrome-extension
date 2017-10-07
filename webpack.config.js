@@ -113,6 +113,10 @@ if (isProd === true) {
                 to: 'static/img/'
             }, {
                 from: 'src/favicon.ico'
+            }, {
+                from: 'src/static/manifest.json'
+            }, {
+                from: 'src/static/icon.png'
             }]),
 
             // extract CSS into a separate file
