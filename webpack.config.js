@@ -112,8 +112,6 @@ if (isProd === true) {
                 from: 'src/static/img/',
                 to: 'static/img/'
             }, {
-                from: 'src/favicon.ico'
-            }, {
                 from: 'src/static/manifest.json'
             }, {
                 from: 'src/static/icon.png'
