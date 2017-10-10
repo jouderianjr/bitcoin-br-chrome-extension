@@ -22,7 +22,7 @@ type alias Currency =
 
 currenciesDecoder : Decoder (List Currency)
 currenciesDecoder =
-      at [ "ticker_24h", "exchanges" ]
+      at [ "ticker_12h", "exchanges" ]
         ( itemDecoder
            |> keyValuePairs
            |> Json.Decode.map (\a -> List.map transformToCurrencyList  a ) )
