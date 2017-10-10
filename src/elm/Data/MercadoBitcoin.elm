@@ -7,25 +7,40 @@ import Json.Decode exposing (
   at,
   list,
   keyValuePairs,
-  dict, map, float)
+  map, float)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Data.Currency exposing (Currency)
-import List exposing (..)
-import Dict exposing (..)
+import List
 
-mercadoBitcoinDecoder : Decoder (List (String, Currency))
+mercadoBitcoinDecoder : Decoder (List Currency)
 mercadoBitcoinDecoder =
-    at [ "ticker_24h", "exchanges" ]
-      ((decode Currency
-        |> required "high" float
-        |> required "low" float
-        |> required "vol" float
-        |> required "last" float
-        |> hardcoded "MercadoBitcoin")
-        |> keyValuePairs
-        |> Json.Decode.map (\(a,b) -> b ))
-        -- |> Json.Decode.map (\a -> List.map -> (\c, d -> ))
-        -- |> Json.Decode.map (\a -> List.map (\(t1, t2) -> t2 t1) a)
+      at [ "ticker_1h", "exchanges" ]
+        ( itemDecoder
+           |> keyValuePairs
+           |> Json.Decode.map (\a -> List.map transformToCurrencyList  a ) )
+
+transformToCurrencyList : (String, Currency) -> Currency
+transformToCurrencyList (key, currency) =
+  {currency | exchange = getFullExchangeName key}
+
+
+getFullExchangeName : String -> String
+getFullExchangeName abbr =
+  case abbr of
+    "NEG" -> "NegocieCoins"
+    "MBT" -> "MercadoBitcoin"
+    "FOX" -> "FoxBit"
+    "B2U" -> "BitcoinToYou"
+    _ -> abbr
+
+itemDecoder : Decoder Currency
+itemDecoder =
+  decode Currency
+    |> required "high" float
+    |> required "low" float
+    |> required "vol" float
+    |> required "last" float
+    |> hardcoded ""
 
 
 -- currencyDecoder =
@@ -42,6 +57,3 @@ mercadoBitcoinDecoder =
 --     |> hardcoded "MercadoBitcoin")
 --     |> keyValuePairs
 --     |> Dict.values)
-
-
-

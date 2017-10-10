@@ -14,6 +14,7 @@ import Html exposing (
   td)
 
 import List exposing (map)
+import String
 
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -38,7 +39,7 @@ main = program
 
 -- MODEL
 type alias Model =
-  { currencies: String
+  { currencies: List Currency
   , err: String
   }
 
@@ -52,27 +53,22 @@ exampleTest =
   }
 
 model : Model
-model = {currencies = "", err = ""}
+model = {currencies = [], err = ""}
 
 -- UPDATE
 type Msg = NoOp
   | OnBtnClicked
-  | GetMercadoBitcoinCurrency (Result Http.Error (List ( String, Currency )))
+  | GetCurrencies (Result Http.Error (List Currency))
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg {currencies, err} =
   case msg of
     NoOp -> (model, Cmd.none)
     OnBtnClicked -> (model, getMercadoBitcoinCurrency)
-    GetMercadoBitcoinCurrency (Ok currencies) ->
-      ({model | currencies = toString currencies } , Cmd.none)
-    GetMercadoBitcoinCurrency (Err (Http.BadPayload message response)) ->
-      ({model | err = message}, Cmd.none)
-    GetMercadoBitcoinCurrency (Err (Http.BadUrl _)) -> (model , Cmd.none)
-    GetMercadoBitcoinCurrency (Err (Http.Timeout)) -> (model , Cmd.none)
-    GetMercadoBitcoinCurrency (Err (Http.NetworkError)) -> (model , Cmd.none)
-    GetMercadoBitcoinCurrency (Err (Http.BadStatus _)) -> (model , Cmd.none)
-
+    GetCurrencies (Ok currencies) ->
+      ({model | currencies = currencies } , Cmd.none)
+    GetCurrencies (Err err) ->
+      ({model | err = toString err}, Cmd.none)
 
 -- VIEW
 -- Html is defined as: elem [ attribs ][ children ]
@@ -81,42 +77,38 @@ view : Model -> Html Msg
 view {currencies} =
   div
     [ class "container" ]
-    [ div [ class "row" ] [ text currencies]
+    [ div [ class "row" ]
+      [ button [ class "btn btn-danger", onClick OnBtnClicked] [text "Reload"]
+      , table [ class "table table-inverse" ]
+        [ thead []
+          [ tr []
+            [ th [] [ text "Exchange" ]
+            , th [] [ text "High" ]
+            , th [] [ text "Last" ]
+            , th [] [ text "Low" ]
+            , th [] [ text "Vol" ]
+            ]
+          ]
+        , tbody [] (map renderCurrencyRow currencies)
+        ]
+      ]
     ]
--- view : Model -> Html Msg
--- view {currencies} =
---   div
---     [ class "container" ]
---     [ div [ class "row" ]
---       [ button [ class "btn btn-danger", onClick OnBtnClicked] [text "click me!"]
---       , table [ class "table table-inverse" ]
---         [ thead []
---           [ tr []
---             [ th [] [ text "Exchange" ]
---             , th [] [ text "Buy" ]
---             , th [] [ text "High" ]
---             , th [] [ text "Last" ]
---             , th [] [ text "Low" ]
---             , th [] [ text "Sell" ]
---             , th [] [ text "Vol" ]
---             ]
---           ]
---         , tbody [] (map renderCurrencyRow currencies)
---         ]
---       ]
---     ]
 
--- renderCurrencyRow : Currency -> Html Msg
--- renderCurrencyRow currency =
---   tr []
---     [ th [] [ text currency.exchange ]
---     , th [] [ text currency.buy ]
---     , th [] [ text currency.high ]
---     , th [] [ text currency.last ]
---     , th [] [ text currency.low ]
---     , th [] [ text currency.sell ]
---     , th [] [ text currency.vol ]
---     ]
+renderCurrencyRow : Currency -> Html Msg
+renderCurrencyRow currency =
+  tr []
+    [ th [] [ text currency.exchange ]
+    , th [] [ text (formattedCurrency currency.high) ]
+    , th [] [ text (formattedCurrency currency.last) ]
+    , th [] [ text (formattedCurrency currency.low) ]
+    , th [] [ text (formattedCurrency currency.vol) ]
+    ]
+
+formattedCurrency : Float -> String
+formattedCurrency number =
+  number
+    |> toString
+    |> String.append "R$ "
 
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
@@ -130,6 +122,5 @@ getMercadoBitcoinCurrency : Cmd Msg
 getMercadoBitcoinCurrency =
   let
     url = "https://api.bitvalor.com/v1/ticker.json"
-    -- url = "https://www.mercadobitcoin.net/api/BTC/ticker/"
   in
-    Http.send GetMercadoBitcoinCurrency (Http.get url mercadoBitcoinDecoder)
+    Http.send GetCurrencies (Http.get url mercadoBitcoinDecoder)
