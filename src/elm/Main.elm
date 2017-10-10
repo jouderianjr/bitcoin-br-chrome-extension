@@ -13,13 +13,12 @@ import Html exposing (
   th,
   td,
   h3,
-  i)
+  a)
 
 import List exposing (map)
 import String
 
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, target, href)
 import Http
 
 import Data.Currency exposing (currenciesDecoder, Currency)
@@ -37,15 +36,6 @@ main = program
 type alias Model =
   { currencies: List Currency
   , err: String
-  }
-
-exampleTest : Currency
-exampleTest =
-  { high =  0
-  , low = 0
-  , vol = 0
-  , last = 0
-  , exchange = ""
   }
 
 model : Model
@@ -87,13 +77,12 @@ view {currencies} =
         ]
       , tbody [] (map renderCurrencyRow currencies)
       ]
-    -- , button [ class "btn btn-lg btn-info ", onClick OnBtnClicked] [text "Reload"]
     ]
 
 renderCurrencyRow : Currency -> Html Msg
 renderCurrencyRow currency =
   tr []
-    [ th [] [ text currency.exchange ]
+    [ th [] [ a [ target "_blank", href currency.link] [ text currency.exchange ] ]
     , th [] [ text (formattedCurrency currency.high) ]
     , th [] [ text (formattedCurrency currency.last) ]
     , th [] [ text (formattedCurrency currency.low) ]

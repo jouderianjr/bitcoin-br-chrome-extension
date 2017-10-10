@@ -17,6 +17,7 @@ type alias Currency =
   , vol: Float
   , last: Float
   , exchange: String
+  , link: String
   }
 
 currenciesDecoder : Decoder (List Currency)
@@ -28,7 +29,7 @@ currenciesDecoder =
 
 transformToCurrencyList : (String, Currency) -> Currency
 transformToCurrencyList (key, currency) =
-  {currency | exchange = getFullExchangeName key}
+  {currency | exchange = getFullExchangeName key, link = getExchangeLink key}
 
 getFullExchangeName : String -> String
 getFullExchangeName abbr =
@@ -40,6 +41,16 @@ getFullExchangeName abbr =
     "ARN" -> "Arena Bitcoin"
     _ -> abbr
 
+getExchangeLink : String -> String
+getExchangeLink abbr =
+  case abbr of
+    "NEG" -> "https://www.negociecoins.com.br"
+    "MBT" -> "https://www.mercadobitcoin.com.br"
+    "FOX" -> "https://foxbit.exchange"
+    "B2U" -> "https://www.bitcointoyou.com"
+    "ARN" -> "www.arenabitcoin.com.br"
+    _ -> "#"
+
 itemDecoder : Decoder Currency
 itemDecoder =
   decode Currency
@@ -47,4 +58,5 @@ itemDecoder =
     |> required "low" float
     |> required "vol" float
     |> required "last" float
+    |> hardcoded ""
     |> hardcoded ""
