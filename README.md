@@ -4,6 +4,8 @@
 
 Hey, I built this extension using Elm (:heart:) and fetching data from (BitValor)[https://bitvalor.com/api]
 
+[Click here to use it!](https://chrome.google.com/webstore/detail/bitcoin-br/keoihaeoogphapkdoijfnfboggimfdkj?hl=pt-BR)
+
 ### Running Locally:
 
 Clone this repo.
