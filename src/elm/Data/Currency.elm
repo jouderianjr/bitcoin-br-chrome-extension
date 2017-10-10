@@ -39,6 +39,7 @@ getFullExchangeName abbr =
     "FOX" -> "FoxBit"
     "B2U" -> "BitcoinToYou"
     "ARN" -> "Arena Bitcoin"
+    "LOC" -> "LocalBitcoins"
     _ -> abbr
 
 getExchangeLink : String -> String
@@ -48,7 +49,8 @@ getExchangeLink abbr =
     "MBT" -> "https://www.mercadobitcoin.com.br"
     "FOX" -> "https://foxbit.exchange"
     "B2U" -> "https://www.bitcointoyou.com"
-    "ARN" -> "www.arenabitcoin.com.br"
+    "ARN" -> "https://www.arenabitcoin.com.br"
+    "LOC" -> "https://localbitcoins.com/"
     _ -> "#"
 
 itemDecoder : Decoder Currency
