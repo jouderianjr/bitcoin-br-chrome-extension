@@ -11,7 +11,9 @@ import Html exposing (
   tbody,
   tr,
   th,
-  td)
+  td,
+  h3,
+  i)
 
 import List exposing (map)
 import String
@@ -20,13 +22,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Http
 
--- component import example
-import Data.MercadoBitcoin exposing (mercadoBitcoinDecoder)
--- import Data.FoxBit exposing (foxBitDecoder)
-
-import Data.Currency exposing (
-  Currency)
-
+import Data.Currency exposing (currenciesDecoder, Currency)
 
 -- APP
 main : Program Never Model Msg
@@ -64,7 +60,8 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg {currencies, err} =
   case msg of
     NoOp -> (model, Cmd.none)
-    OnBtnClicked -> (model, getMercadoBitcoinCurrency)
+    OnBtnClicked ->
+      ({model | currencies = []}, getCurrencies)
     GetCurrencies (Ok currencies) ->
       ({model | currencies = currencies } , Cmd.none)
     GetCurrencies (Err err) ->
@@ -77,21 +74,20 @@ view : Model -> Html Msg
 view {currencies} =
   div
     [ class "container" ]
-    [ div [ class "row" ]
-      [ button [ class "btn btn-danger", onClick OnBtnClicked] [text "Reload"]
-      , table [ class "table table-inverse" ]
-        [ thead []
-          [ tr []
-            [ th [] [ text "Exchange" ]
-            , th [] [ text "High" ]
-            , th [] [ text "Last" ]
-            , th [] [ text "Low" ]
-            , th [] [ text "Vol" ]
-            ]
+    [ h3 [ class "text-center" ] [ text "BR Bitcoin Currency" ]
+    , table [ class "table table-inverse" ]
+      [ thead []
+        [ tr []
+          [ th [] [ text "Exchange" ]
+          , th [] [ text "High" ]
+          , th [] [ text "Last" ]
+          , th [] [ text "Low" ]
+          , th [] [ text "Vol" ]
           ]
-        , tbody [] (map renderCurrencyRow currencies)
         ]
+      , tbody [] (map renderCurrencyRow currencies)
       ]
+    -- , button [ class "btn btn-lg btn-info ", onClick OnBtnClicked] [text "Reload"]
     ]
 
 renderCurrencyRow : Currency -> Html Msg
@@ -101,7 +97,7 @@ renderCurrencyRow currency =
     , th [] [ text (formattedCurrency currency.high) ]
     , th [] [ text (formattedCurrency currency.last) ]
     , th [] [ text (formattedCurrency currency.low) ]
-    , th [] [ text (formattedCurrency currency.vol) ]
+    , th [] [ currency.vol |> toString |> text ]
     ]
 
 formattedCurrency : Float -> String
@@ -116,11 +112,11 @@ subscriptions model = Sub.none
 
 -- INIT
 init : (Model, Cmd Msg)
-init = ( model , getMercadoBitcoinCurrency )
+init = ( model , getCurrencies )
 
-getMercadoBitcoinCurrency : Cmd Msg
-getMercadoBitcoinCurrency =
+getCurrencies : Cmd Msg
+getCurrencies =
   let
     url = "https://api.bitvalor.com/v1/ticker.json"
   in
-    Http.send GetCurrencies (Http.get url mercadoBitcoinDecoder)
+    Http.send GetCurrencies (Http.get url currenciesDecoder)
